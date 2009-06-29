@@ -4,7 +4,6 @@ require 'open-uri'
 require 'iconv'
 
 module TopToolkit
-  #生成签名
   def sign(param,sercetCode)
     array = param.sort()
     i = 0
@@ -18,7 +17,6 @@ module TopToolkit
     return str.upcase()
   end
   
-  #组装请求参数
   def createRequestParam(paramArray)
     array = paramArray.sort()
     i = 0
@@ -36,38 +34,29 @@ module TopToolkit
     return str.gsub!(/[^\w$&\-+.,\/:;=?@]/) { |x| x = format("%%%x", x[0])}  
   end
   
-  #把str的编码转化为GBK编码
   def to_gbk(str)
     Iconv.iconv("GBK//IGNORE","UTF-8//IGNORE",str).to_s
   end
   
   module ClassMethods
     def request_top(options)
-      #组装参数
       paramArray = {
-        #组装协议参数
-        'app_key'=>'test',
-        'method'=>'taobao.taobaoke.items.get',
-        'format'=>'xml',
+        'app_key'=>'12001200',                              
+        #'app_key'=>'test',                              
+        'format'=>'json',
         'v'=>'1.0',
-        'timestamp'=>Time.new.strftime("%Y-%m-%d %H:%M:%S"),
-          #组装应用参数
-        'fields'=>'iid,title,nick,pic_url,price,click_url',
-        'pid' => 'mm_5410_0_0',
-        'cid' => '1512',
-        'page_no' => '1',
-        'page_size' => '6'
+        'timestamp'=>Time.new.strftime("%Y-%m-%d %H:%M:%S")
       }
       if options.is_a?(Hash)
         hash = {}
         options.each{|k,v| hash[k.to_s] = v}
         paramArray.merge!(hash) 
       end
-      url = 'http://gw.sandbox.taobao.com/router/rest?'
-      url = url + createRequestParam(paramArray)+'sign=' + sign(paramArray,'test')
-      parsedURL = URI.parse(URLEncode(url))
+      url = 'http://gw.api.taobao.com/router/rest?'
+      url = url + createRequestParam(paramArray)+'sign=' + sign(paramArray,'d6c63786184be2dbd9c6c55e29d41e55')
+      #p '---------------',URI.escape(url)
+      parsedURL = URI.parse(URI.escape(url))
       
-      #请求生成的URL，把结果输出
       Net::HTTP.version_1_2
       open(parsedURL)do|http|
         return http.read
